@@ -2,6 +2,6 @@ requests
 opencv-python
 numpy
 Pillow
-streamlit
+streamlit==1.29.0
 streamlit-image-coordinates
 streamlit-dimensions
