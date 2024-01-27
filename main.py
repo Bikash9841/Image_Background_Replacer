@@ -14,28 +14,20 @@ api_endpoint = "https://rituramojha.ap-south-1.modelbit.com/v1/remove_background
 
 # set layout
 st.set_page_config(layout='wide')
+st.title("Image Background Remover")
 
 col1, col2 = st.columns(2)
+
 
 # -----------get the width of the col2
 # with col2:
 #     screen_dim = st_dimensions(key='col1') #got width=680
 #     st.write(screen_dim['width'])
 
-# --------to visualize the columns
-# # Define the width and height of the rectangle
-# width = screen_dim['width']
-# height = 100
-
-# Create a simple rectangle using HTML and CSS
-# rectangle_style = f"width: {width}px; height: {height}px; background-color: lightblue; border: 1px solid black;"
-# html_code = f'<div style="{rectangle_style}"></div>'
-
-# Display the rectangle using st.markdown
-# st.markdown(html_code, unsafe_allow_html=True)
 
 # file uploader
 file = col2.file_uploader('Upload Image', type=['jpeg', 'jpg', 'png'])
+
 
 # read image
 if file is not None:
@@ -49,17 +41,17 @@ if file is not None:
 
     # getting the coordinates of the image where the user clicked
     placeholder0 = col1.empty()
+
     with placeholder0:
         value = im_coordinates(image, key='initial')
-    # if value is not None:
-        # st.write(value)
 
     if col2_1.button('Original', use_container_width=True):
         placeholder0.empty()
         placeholder1 = col1.empty()
         with placeholder1:
-            # col1.image(image, use_column_width=True)
-            value = im_coordinates(image, key='next')
+            placeholder1.image(image)
+            # rerun from the top to enable user to click at another place in the image
+            st.rerun()
 
     if col2_2.button('Remove Background', type='primary', use_container_width=True):
         placeholder0.empty()
@@ -91,7 +83,7 @@ if file is not None:
             final_image_ap = cv.imdecode(np.frombuffer(
                 final_image_bytes, dtype=np.uint8), cv.IMREAD_UNCHANGED)
 
-            cv.imwrite(filename, cv.cvtColor(final_image_ap, cv.COLOR_BGR2RGB))
+            cv.imwrite(filename, final_image_ap)
 
         with placeholder2:
-            col1.image(final_image_ap, use_column_width=True)
+            placeholder2.image(final_image_ap, use_column_width=True)
