@@ -8,13 +8,20 @@ import base64
 import requests
 import os
 
+from txt2img import gen_img
 
-api_endpoint = "https://rituramojha.ap-south-1.modelbit.com/v1/remove_background/latest"
 
+# have to add text input in streamlit
+# inp = input("what image you want to generate: ")
+
+gen_img_api = np.ones((500, 500, 3))*255
+
+# api endpoint for background removal
+api_endpoint_br = "https://rituramojha.ap-south-1.modelbit.com/v1/remove_background/latest"
 
 # set layout
 st.set_page_config(layout='wide')
-st.title("Image Background Remover")
+st.title("Image Background Replacer")
 
 col1, col2 = st.columns(2)
 
@@ -33,8 +40,10 @@ file = col2.file_uploader('Upload Image', type=['jpeg', 'jpg', 'png'])
 if file is not None:
     image = Image.open(file).convert('RGB')
     # the '680' is obtained from the width of columns earlier
-    image = image.resize((680, int(
-        image.height*680/(image.width))))
+    # image = image.resize((680, int(
+    #     image.height*680*0.5/(image.width))))
+    image = cv.resize(np.asarray(image), (680, int(
+        image.height*680/(image.width))), interpolation=cv.INTER_AREA)
 
     # create buttons
     col2_1, col2_2 = col2.columns(2)
@@ -53,7 +62,7 @@ if file is not None:
             # rerun from the top to enable user to click at another place in the image
             st.rerun()
 
-    if col2_2.button('Remove Background', type='primary', use_container_width=True):
+    if col2_2.button('Replace Background', type='primary', use_container_width=True):
         placeholder0.empty()
         placeholder2 = col1.empty()
 
@@ -73,7 +82,7 @@ if file is not None:
 
             # calling from the api
             api_dataa = {"data": [image_bytes_encoded, value['x'], value['y']]}
-            response = requests.post(api_endpoint, json=api_dataa)
+            response = requests.post(api_endpoint_br, json=api_dataa)
 
             # getting the output from the API
             final_image = response.json()['data']
@@ -83,7 +92,21 @@ if file is not None:
             final_image_ap = cv.imdecode(np.frombuffer(
                 final_image_bytes, dtype=np.uint8), cv.IMREAD_UNCHANGED)
 
-            cv.imwrite(filename, final_image_ap)
+            # replacing work from here
+            bg_img = cv.resize(
+                gen_img_api, (final_image_ap.shape[1], final_image_ap.shape[0]))
+            x = final_image_ap[:, :, 3]
+            y = cv.bitwise_not(x)
+            n = cv.merge((bg_img, y))
+
+            # Create a mask for pixels where the alpha channel of n is 0
+            alpha_zero_mask = n[:, :, 3] == 0
+
+            # Use the mask to update the values in n with the corresponding values from final_image_api
+            n[alpha_zero_mask] = final_image_ap[alpha_zero_mask]
+
+            # cv.imwrite(filename, final_image_ap)
+            cv.imwrite(filename, n)
 
         with placeholder2:
-            placeholder2.image(final_image_ap, use_column_width=True)
+            placeholder2.image(n, use_column_width=True)
