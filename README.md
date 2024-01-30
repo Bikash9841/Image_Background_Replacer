@@ -1,2 +1,4 @@
-# Image Background Replacer Using Segment-Anything Model
-working on making a web app to create a functionality of `replacing background of images based on user given prompts`
+# Image Background Replacer Using Segment-Anything Model and Stable Diffusion
+1. a web app to `replace background of image based on user given prompts`.
+2. used Segment Anything Model,stable diffusion,modelbit and streamlit.
+
