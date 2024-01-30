@@ -10,7 +10,7 @@ def gen_img(prompt):
     '''
     takes in prompt and return ndarray image.
     '''
-    prompt = "photo realistic murder scene with vibrant lights"
+    # prompt = "photo realistic murder scene with vibrant lights"
 
     # calling from the api
     api_data = {"data": [prompt]}
@@ -24,6 +24,3 @@ def gen_img(prompt):
     gen_img_api = cv.imdecode(np.frombuffer(
         final_image_bytes, dtype=np.uint8), cv.IMREAD_UNCHANGED)
     return gen_img_api
-
-# cv.imshow("Txt2Img Generation", gen_img_api)
-# print(gen_img_api)

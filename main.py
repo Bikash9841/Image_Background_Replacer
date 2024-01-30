@@ -11,10 +11,9 @@ import os
 from txt2img import gen_img
 
 
-# have to add text input in streamlit
-# inp = input("what image you want to generate: ")
-
-gen_img_api = np.ones((500, 500, 3))*255
+# Initialize previous prompt only once using st.session_state
+if 'p_prompt' not in st.session_state:
+    st.session_state.p_prompt = " "
 
 # api endpoint for background removal
 api_endpoint_br = "https://rituramojha.ap-south-1.modelbit.com/v1/remove_background/latest"
@@ -40,8 +39,6 @@ file = col2.file_uploader('Upload Image', type=['jpeg', 'jpg', 'png'])
 if file is not None:
     image = Image.open(file).convert('RGB')
     # the '680' is obtained from the width of columns earlier
-    # image = image.resize((680, int(
-    #     image.height*680*0.5/(image.width))))
     image = cv.resize(np.asarray(image), (680, int(
         image.height*680/(image.width))), interpolation=cv.INTER_AREA)
 
@@ -54,13 +51,16 @@ if file is not None:
     with placeholder0:
         value = im_coordinates(image, key='initial')
 
-    if col2_1.button('Original', use_container_width=True):
-        placeholder0.empty()
-        placeholder1 = col1.empty()
-        with placeholder1:
-            placeholder1.image(image)
-            # rerun from the top to enable user to click at another place in the image
-            st.rerun()
+    # if col2_1.button('Original', use_container_width=True):
+    #     placeholder0.empty()
+    #     placeholder1 = col1.empty()
+    #     with placeholder1:
+    #         placeholder1.image(image)
+    #         # rerun from the top to enable user to click at another place in the image
+    #         st.rerun()
+
+    # get user prompt
+    u_prompt = col2_1.text_input("what do you want your background to be: 👇")
 
     if col2_2.button('Replace Background', type='primary', use_container_width=True):
         placeholder0.empty()
@@ -70,10 +70,12 @@ if file is not None:
         # then no need to call for API evertime user transition from original
         # image to remove background buttons for same image.->makes process faster
         filename = '{}_{}_{}.png'.format('test', value['x'], value['y'])
-        if os.path.exists(filename):
-            final_image_ap = cv.imread(filename, cv.IMREAD_UNCHANGED)
+        if os.path.exists(filename) and st.session_state.p_prompt == u_prompt:
+            n = cv.imread(filename, cv.IMREAD_UNCHANGED)
 
         else:
+
+            gen_img_api = gen_img(u_prompt)
 
             # encoding the image into base64 format to send to the API
             _, img_bytes = cv.imencode('.png', np.asarray(image))
@@ -107,6 +109,7 @@ if file is not None:
 
             # cv.imwrite(filename, final_image_ap)
             cv.imwrite(filename, n)
+            st.session_state.p_prompt = u_prompt
 
         with placeholder2:
             placeholder2.image(n, use_column_width=True)
