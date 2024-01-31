@@ -1,6 +1,6 @@
 # Image Background Replacer Using Segment-Anything Model and Stable Diffusion
 1. a web app to `replace background of image based on user given prompts`.
-2. used Segment Anything Model,stable diffusion,modelbit and streamlit.
+2. used `Segment Anything Model` for image segmentation, `stable_diffusion_2_1` for text-to-image generation, `modelbit` to deploy ML models and `streamlit` to create a web-app.
 
 # Results
 
