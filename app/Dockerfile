@@ -8,7 +8,7 @@ COPY . /app
 WORKDIR /app
 
 # this runs pip install for all the packages listed in your requirements.txt file
-# RUN pip install -r requirements.txt
+RUN pip install -r requirements.txt
 
 # This tells Docker to listen on port 8501 at runtime. Port 8501 is the streamlit's default port.
 EXPOSE 8501
